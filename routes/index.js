@@ -12,10 +12,10 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
+//Univoque id generator
 function genId(items){
     return items.length > 0 ? Math.max(...items.map(item => item.id)) + 1 : 1;
 }
-
 
 //GET /items
 router.get("/items", async (req, res) => {
@@ -78,6 +78,7 @@ router.patch("/items/:id", (req, res) => {
 });
 
 // //DELETE /items/:id
+//Saving the item and retrive the index with indexOf
 // router.delete("/items/:id", (req, res) => {
 //     const item = items.find(val => val.id === Number(req.params.id));
 
@@ -99,6 +100,7 @@ router.patch("/items/:id", (req, res) => {
 // });
 
 //DELETE /items/:id
+//Save the deleted product before splice because i use indexes
 router.delete("/items/:id", (req, res) => {
     const itemIndex = items.findIndex(val => val.id === Number(req.params.id));
 
