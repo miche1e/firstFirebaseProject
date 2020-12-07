@@ -33,7 +33,7 @@ router.get("/items/:id", (req, res) => {
         item => {
             if(!item.exists){
                 //res.status(404);
-                res.status(404).json({message: "User not found"});
+                res.status(404).json({message: "Product not found"});
             }
             res.status(200).json(item.data());
         }
@@ -125,25 +125,34 @@ router.patch("/items/:id", async (req, res) => {
 
 //DELETE /items/:id
 //Save the deleted product before splice because i use indexes
-router.delete("/items/:id", (req, res) => {
-    const itemIndex = items.findIndex(val => val.id === Number(req.params.id));
+router.delete("/items/:id", async (req, res) => {
+    const item = await db.collection('items').doc(req.params.id).get();
 
-    if(itemIndex >= 0){
-        let deletedProduct = items[itemIndex];
-        items.splice(itemIndex, 1);
-        return res.status(200).json(
-            {
-                message: "Product deleted",
-                product: deletedProduct
-            }
-        );
-    }else{
-        return res.status(404).json(
-            {
-                message: "Product not found"
-            }
-        );
+    if(!item.data()){
+        return res.status(404).json({message: "Product not found"});
     }
+
+    db.collection("items").doc(req.params.id).delete();
+    return res.status(200).json({message: "Product deleted"});
+
+    // const itemIndex = items.findIndex(val => val.id === Number(req.params.id));
+
+    // if(itemIndex >= 0){
+    //     let deletedProduct = items[itemIndex];
+    //     items.splice(itemIndex, 1);
+    //     return res.status(200).json(
+    //         {
+    //             message: "Product deleted",
+    //             product: deletedProduct
+    //         }
+    //     );
+    // }else{
+    //     return res.status(404).json(
+    //         {
+    //             message: "Product not found"
+    //         }
+    //     );
+    // }
 });
 
 module.exports = router;
