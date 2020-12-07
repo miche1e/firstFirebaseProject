@@ -32,11 +32,11 @@ router.get("/items/:id", (req, res) => {
         item => {
             if(!item.exists){
                 //res.status(404);
-                throw new Error("Item not found");
+                res.status(404).json(message: "User not found");
             }
             res.status(200).json(item.data());
         }
-    ).catch(error => res.status(404).send(error));
+    ).catch(error => res.status(500).send(error));
 });
 
 //POST /items
