@@ -18,7 +18,7 @@ function genId(items) {
 }
 
 //Update local db items
-function updateItems() {
+async function updateItems() {
     items.length = 0;
     const list = await db.collection('items').get();
     list.forEach(doc => items.push(doc.data()));
