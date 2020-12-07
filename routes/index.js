@@ -19,10 +19,11 @@ function genId(items){
 
 //GET /items
 router.get("/items", async (req, res) => {
-    const products = [];
+    //aggiorna db locale
+    items.length = 0;
     const list = await db.collection('items').get();
-    list.forEach(doc => products.push(doc.data()));
-    items = products;
+    list.forEach(doc => items.push(doc.data()));
+
     return res.status(200).json(items);
 });
 
@@ -32,7 +33,7 @@ router.get("/items/:id", (req, res) => {
         item => {
             if(!item.exists){
                 //res.status(404);
-                res.status(404).json(message: "User not found");
+                res.status(404).json({message: "User not found"});
             }
             res.status(200).json(item.data());
         }
@@ -40,7 +41,12 @@ router.get("/items/:id", (req, res) => {
 });
 
 //POST /items
-router.post("/items", (req, res) => {
+router.post("/items", async (req, res) => {
+    //aggiorna db locale
+    items.length = 0;
+    const list = await db.collection('items').get();
+    list.forEach(doc => items.push(doc.data()));
+
     const newId = genId(items);
     if(req.body.product){
         let item = {
@@ -58,23 +64,41 @@ router.post("/items", (req, res) => {
 });
 
 //PATCH /items/:id
-router.patch("/items/:id", (req, res) => {
-    const item = items.find(val => val.id === Number(req.params.id));
+router.patch("/items/:id", async (req, res) => {
+    //aggiorna db locale
+    items.length = 0;
+    const list = await db.collection('items').get();
+    list.forEach(doc => items.push(doc.data()));
 
-    if(item){
-        item.product = req.body.product;
-        return res.status(200).json(
-            {
-                message: "Product updated"
-            }
-        );
-    }else{
-        return res.status(404).json(
-            {
-                message: "Product not found"
-            }
-        );
+    if(!req.body.product){
+        return res.status(400).json({message: "Insert a product!"});
     }
+
+    const item = await db.collection('items').doc(req.params.id).get();
+
+    if(!item.data()){
+        return res.status(404).json({message: "User not found"});
+    }
+
+    db.collection("items").doc(req.params.id).set({product: req.body.product}, {merge: true});
+    return res.status(400).json({message: "Product updated"});
+
+    // const item = items.find(val => val.id === Number(req.params.id));
+
+    // if(item){
+    //     item.product = req.body.product;
+    //     return res.status(200).json(
+    //         {
+    //             message: "Product updated"
+    //         }
+    //     );
+    // }else{
+    //     return res.status(404).json(
+    //         {
+    //             message: "Product not found"
+    //         }
+    //     );
+    // }
 });
 
 // //DELETE /items/:id
